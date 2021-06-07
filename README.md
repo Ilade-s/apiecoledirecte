@@ -13,5 +13,5 @@ Si la connexion est aboutie, vous pouvez ensuite vérifier quelques informations
 ```py
 TokenDeConnexion = <variable>.token
 ReponseHTTPConnexion = <variable>.response
-username = <variable>.token["data"]["accounts"][0]["identifiant"]
+Username = <variable>.token["data"]["accounts"][0]["identifiant"]
 ```
