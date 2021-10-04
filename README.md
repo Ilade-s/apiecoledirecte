@@ -7,7 +7,7 @@ Pour commencer, vous devrez vous connecter à votre compte en utilisant votre no
 
 Pour cela, vous devrez initialiser la classe EcoleDirecte comme ceci :
 ```py
-<variable> = EcoleDirecte(username: str, password: str)
+<variable> = EcoleDirecte(username: str, password: str (, save_json: bool))
 ```
 Si la connexion est aboutie, vous pouvez ensuite vérifier quelques informations de connexion telles que :
 ```py
