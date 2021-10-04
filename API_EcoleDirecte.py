@@ -26,9 +26,9 @@ import requests as req # module pour requêtes HTTP
 from rich import print # print permettant de mieux voir les réponses json (dictionnaires)
 from datetime import date
 
-def create_week_days():
+def create_week_list() -> list[str]:
     """
-    retourne un tuple avec la date du lundi et du dimanche de cette semaine au format AAAA-MM-JJ
+    retourne une liste des jour de la semaine actuelle au format AAAA-MM-JJ
     """
     # nombre de jour par mois (année non bissextile, dans l'ordre de janvier à décembre)
     JMOIS = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
@@ -53,8 +53,8 @@ def create_week_days():
         ])
         for day in week
     ]
-    print(week)
-    return week[0], week[-1]
+
+    return week
 
 class EcoleDirecte():
     """
@@ -94,10 +94,10 @@ class EcoleDirecte():
             self.json = self.response.json()
             with open("login.json", "w+", encoding="UTF-8") as file:    
                 json.dump(self.json, file)
-            #print(self.response)
+
+            self.response.raise_for_status()
             self.token = self.json['token']
             self.id = self.json["data"]["accounts"][0]["id"]
-            self.response.raise_for_status()
         except Exception as e:
             if type(e).__name__ == "ConnectionError":
                 print("[reverse bold red]La connexion a échoué[/]")
@@ -105,22 +105,43 @@ class EcoleDirecte():
             else:
                 print(f"Une erreur inconnue est survenue (identifiant ou mot de passe incorrect ?) : {e}")
     
-    def fetch_schedule(self):
+    def fetch_schedule(self) -> dict[str, list[dict]]:
         """
         Retourne l'emploi du temps de la semaine sous la forme d'un dictionnaire au format {jour: listeCours[Cours]}
+        pour chaque jour, la liste des cours sera triée dans l'ordre (du plus tôt au plus tard)
+
+        PARAMETRES :
+        ----------
+            Aucun
+        
+        SORTIE :
+        ----------
+            - schedule : dict[str, list[dict]]
+                - dictionnaire des jours de la semaine, avec la liste des cours de chaque jour dans l'ordre
         """
-        monday, sunday = create_week_days()
-        data = {
-            "token": self.token,
-            "dateDebut": monday,
-            "dateFin": sunday,
+        week = create_week_list()
+        data = { # payload for request
+            "token": self.token, # login token
+            "dateDebut": week[0], # monday
+            "dateFin": week[-1], # sunday
             "avecTrous": False,
         }
         payload = 'data=' + json.dumps(data)
         response = req.post("https://api.ecoledirecte.com/v3/E/" +
                     str(self.id) + "/emploidutemps.awp?verbe=get&", data=payload)
         responseJson = response.json()
-        #print(responseJson)
+        coursList = responseJson['data']
+        # create schedule dictionnary
+        def get_key(course):
+            hour, minutes = course['start_date'].split(' ')[1].split(':')
+            value = int(hour) * 60 + int(minutes)
+            return value
+
+        schedule = {day: sorted([course for course in coursList if day in course['start_date']], key=get_key)
+            for day in week 
+        }
+
+        return schedule
 
 if __name__=='__main__': # test
     print("===============================================================")
@@ -137,4 +158,6 @@ if __name__=='__main__': # test
 
     print("fetching schedule...")
 
-    interface.fetch_schedule()
+    schedule = interface.fetch_schedule()
+
+    print(schedule)
