@@ -17,9 +17,9 @@ ReponseHTTPConnexion = <variable>.response
 Username = <variable>.response["data"]["accounts"][0]["identifiant"]
 ```
 ## Méthodes disponibles :
-Pour récupérer l'emploi du temps de cette semaine, il vous suffit d'appeller fetch_schedule comme ceci :
 ```py
 <variable>.fetch_schedule() -> dict[str, list[dict]] # l'emploi du temps de cette semaine
-<variable>.fetch_work() -> list[dict] # devoirs à faire
+<variable>.fetch_work() -> list[dict] # liste des devoirs à faire
+<variable>.fetch_notes() -> dict[matiere: str, dict] # dictionnaire des notes par matières
 ```
 
