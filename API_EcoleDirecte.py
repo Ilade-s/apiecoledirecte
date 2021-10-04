@@ -4,12 +4,12 @@ au moyen de requêtes http à l'API interne du site.
 
 Si vous avez besoin d'aide ou trouvé un bug, n'hésitez pas à me le faire savoir 
 
-INFORMATIONS DISPONIBLES (quand faites) :
+INFORMATIONS DISPONIBLES :
 -------------------
-    - emploi du temps (en cours)
-    - devoirs (à faire)
+    - emploi du temps
+    - devoirs
+    - notes (en cours)
     - contenus de séance (à faire)
-    - notes (à faire)
 
 FONCTIONNEMENT
 -------------------
@@ -153,7 +153,8 @@ class EcoleDirecte():
     
     def fetch_work(self, raw_data=False) -> list[dict]:
         """
-        Retourne la liste des devoirs donnés, sous la forme de dictionnaires formatés/simplifiés ou non
+        Retourne la liste des devoirs donnés, sous la forme de dictionnaires formatés/simplifiés ou non.
+
         Peut prendre quelques secondes à s'exécuter (décodage de base64 assez long)
 
         PARAMETRES :
