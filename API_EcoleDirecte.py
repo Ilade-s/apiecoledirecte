@@ -60,13 +60,12 @@ class EcoleDirecte():
     """
     Interface API d'EcoleDirecte
     """
-    def __init__(self, username: str, password: str) -> None:
+    def __init__(self, username: str, password: str, save_json=False) -> None:
         """
-        Permet de se connecter à école directe afin de récupérer le token, nécessaire afin de récupérer les infos
+        Permet de se connecter à école directe afin de récupérer le token, nécessaire afin de récupérer les infos de l'API
         ----------
 
         Envoie une requête HTTP à école directe afin de s'authentifier et récupérer le token.
-        L'objet ainsi obtenu devra ensuite être donné en paramètre dans les fonctions de récupération.
 
         PARAMETRES : 
         ----------
@@ -74,6 +73,9 @@ class EcoleDirecte():
                 - nom d'utilisateur/de compte école directe
             - password : str
                 - mot de passe
+            - save_json : bool
+                - si True, sauvegardera la réponse du login dans login.json (non nécessaire)
+                - default = False
         
         SORTIE :
         ----------
@@ -92,8 +94,9 @@ class EcoleDirecte():
                 "https://api.ecoledirecte.com/v3/login.awp", 
                 data=payload)
             self.json = self.response.json()
-            with open("login.json", "w+", encoding="UTF-8") as file:    
-                json.dump(self.json, file)
+            if save_json:
+                with open("login.json", "w+", encoding="UTF-8") as file:    
+                    json.dump(self.json, file)
 
             self.response.raise_for_status()
             self.token = self.json['token']
