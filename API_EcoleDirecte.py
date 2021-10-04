@@ -107,6 +107,7 @@ class EcoleDirecte():
                 print("[red]Vérifiez votre connexion Internet.[/]")
             else:
                 print(f"Une erreur inconnue est survenue (identifiant ou mot de passe incorrect ?) : {e}")
+            exit()
     
     def fetch_schedule(self) -> dict[str, list[dict]]:
         """
