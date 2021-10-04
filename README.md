@@ -1,5 +1,6 @@
 # EcoleDirecte_API-Interface
 Une interface python permettant de récupérer simplement des informations de l'API (devoirs, notes,...)
+(voir documentation et code pour plus d'informations)
 
 # Fonctionnement :
 ## Login :
@@ -15,9 +16,10 @@ TokenDeConnexion = <variable>.token
 ReponseHTTPConnexion = <variable>.response
 Username = <variable>.response["data"]["accounts"][0]["identifiant"]
 ```
-## Récupérer emploi du temps :
+## Méthodes disponibles :
 Pour récupérer l'emploi du temps de cette semaine, il vous suffit d'appeller fetch_schedule comme ceci :
 ```py
-<variable>.fetch_schedule() -> dict[str, list[dict]]
+<variable>.fetch_schedule() -> dict[str, list[dict]] # l'emploi du temps de cette semaine
+<variable>.fetch_work() -> list[dict] # devoirs à faire
 ```
-(voir documentation et code pour plus d'informations)
+

@@ -24,7 +24,11 @@ from getpass import getpass # input pour mot de passe sécurisé
 import json
 import requests as req # module pour requêtes HTTP
 from rich import print # print permettant de mieux voir les réponses json (dictionnaires)
-from datetime import date
+from datetime import date # pour créer dates formatées
+# modules pour décodage base64 en string
+import base64
+import html
+import re
 
 def create_week_list() -> list[str]:
     """
@@ -146,6 +150,67 @@ class EcoleDirecte():
         }
 
         return schedule
+    
+    def fetch_work(self, raw_data=False) -> list[dict]:
+        """
+        Retourne la liste des devoirs donnés, sous la forme de dictionnaires formatés/simplifiés ou non
+        Peut prendre quelques secondes à s'exécuter (décodage de base64 assez long)
+
+        PARAMETRES :
+        ----------
+            - raw_data : bool
+                - si vrai, les dictionnaires des devoirs continendront toutes les informations reçues par la réponse de l'API + la description
+                - sinon, les devoirs seront simplifiés : 'matiere', 'effectue', 'date' et 'description' uniquement
+        
+        SORTIE :
+        ----------
+            - work : list[dict[str, str]]
+                - liste des devoirs à faire
+
+        """
+        def format_data(data):
+            """Format the tasks and adds it their description
+            task format : raw if raw_data flag is set else dict[matiere, effectue, date; description]"""
+            tasks = []
+            for date in data.keys(): # each date, which is the key for the works for each day
+                # send a request for the day to get the description for each work
+                rtask = req.post("https://api.ecoledirecte.com/v3/Eleves/" +
+                    str(self.id) + f"/cahierdetexte/{date}.awp?verbe=get&", data=payload).json()
+                devoirs = rtask["data"]["matieres"]
+                # Sort the response to keep only the work and nothing else
+                devoirs = [task for task in devoirs if "aFaire" in task.keys()]
+                for task in devoirs: # each work of the day
+                    # get the description
+                    a = base64.b64decode(task["aFaire"]["contenu"])
+                    descriptionHTML = a.decode("UTF-8")
+                    description = html.unescape(descriptionHTML)
+                    # Conversion Regex en string normale
+                    desc = re.sub(r"<\/?[a-z]+>|\n", "", description)
+                    # add the task to the list
+                    if raw_data:
+                        tasks.append({
+                            **task, 
+                            'description': desc
+                            })
+                    else:
+                        tasks.append({
+                            'matiere': task['matiere'], 
+                            'effectue': task['aFaire']['effectue'],
+                            'date': date,
+                            'description': desc,
+                            })
+                    
+
+            return tasks
+
+        data = {
+            "token": self.token
+        }
+        payload = 'data=' + json.dumps(data)
+        response = req.post("https://api.ecoledirecte.com/v3/Eleves/" +
+                    str(self.id) + "/cahierdetexte.awp?verbe=get&", data=payload).json()
+
+        return format_data(response["data"])
 
 if __name__=='__main__': # test
     print("===============================================================")
@@ -165,3 +230,9 @@ if __name__=='__main__': # test
     schedule = interface.fetch_schedule()
 
     print(schedule)
+
+    print('fetching work...')
+
+    work = interface.fetch_work()
+
+    print(work)
