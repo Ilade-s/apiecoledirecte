@@ -53,7 +53,7 @@ def create_week_list() -> list[str]:
     # fills zeroes for day and month
     week = [
         '{}-{}-{}'.format(*[
-            part.zfill(2) for part in day.split('-')
+            (part if int(part) else str(int(part) + 1)).zfill(2) for part in day.split('-')
         ])
         for day in week
     ]
