@@ -44,20 +44,22 @@ def create_week_list() -> list[str]:
     week = [
         '{2}-{1}-{0}'.format(
             (CDATE.day + i) % jour_dans_mois + 1,
-            (CDATE.month + 
-                ((CDATE.day + i) // jour_dans_mois)) % 12,
+            ((CDATE.month + 
+                ((CDATE.day + i) // jour_dans_mois)) % 12 
+                    if (CDATE.month + ((CDATE.day + i) // jour_dans_mois)) != 12 else 12),
             CDATE.year + 
-                ((CDATE.month + ((CDATE.day + i) // jour_dans_mois)) // 12))
+                (((CDATE.month + ((CDATE.day + i) // jour_dans_mois)) // 12 
+                    if (CDATE.month + ((CDATE.day + i) // jour_dans_mois)) != 12 else 0)))
         for i in range(-(offset_from_monday+1), 6-offset_from_monday)
     ]
     # fills zeroes for day and month
     week = [
         '{}-{}-{}'.format(*[
-            (part if int(part) else str(int(part) + 1)).zfill(2) for part in day.split('-')
+            part.zfill(2) for part in day.split('-')
         ])
         for day in week
     ]
-
+    print(week)
     return week
 
 class EcoleDirecte():
