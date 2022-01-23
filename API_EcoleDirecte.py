@@ -131,15 +131,15 @@ class EcoleDirecte():
         """
         week = create_week_list()
         data = { # payload for request
-            "token": self.token, # login token
             "dateDebut": week[0], # monday
             "dateFin": week[-1], # sunday
             "avecTrous": False,
         }
         payload = 'data=' + json.dumps(data)
         response = req.post("https://api.ecoledirecte.com/v3/E/" +
-                    str(self.id) + "/emploidutemps.awp?verbe=get&", data=payload)
+                    str(self.id) + "/emploidutemps.awp?verbe=get&", data=payload, headers=self.header)
         responseJson = response.json()
+        self.token = responseJson["token"]
         coursList = responseJson['data']
         # create schedule dictionnary
         def get_key(course):
@@ -178,7 +178,7 @@ class EcoleDirecte():
             for date in data.keys(): # each date, which is the key for the works for each day
                 # send a request for the day to get the description for each work
                 rtask = req.post("https://api.ecoledirecte.com/v3/Eleves/" +
-                    str(self.id) + f"/cahierdetexte/{date}.awp?verbe=get&", data=payload).json()
+                    str(self.id) + f"/cahierdetexte/{date}.awp?verbe=get&", data=payload, headers=self.header).json()
                 devoirs = rtask["data"]["matieres"]
                 # Sort the response to keep only the work and nothing else
                 devoirs = [task for task in devoirs if "aFaire" in task.keys()]
@@ -203,17 +203,25 @@ class EcoleDirecte():
                             'description': desc,
                             })
                     
-
             return tasks
 
-        data = {
-            "token": self.token
-        }
-        payload = 'data=' + json.dumps(data)
-        response = req.post("https://api.ecoledirecte.com/v3/Eleves/" +
-                    str(self.id) + "/cahierdetexte.awp?verbe=get&", data=payload).json()
-
+        payload = 'data={}'
+        rep = req.post("https://api.ecoledirecte.com/v3/Eleves/" +
+                    str(self.id) + "/cahierdetexte.awp?verbe=get&", data=payload, headers=self.header)
+        response = rep.json()
+        self.token = response["token"]
         return format_data(response["data"])
+    
+    def fetch_grades(self) -> dict[str]:
+        payload = 'data={}'
+        rep = req.post(f"https://api.ecoledirecte.com/v3/Eleves/" +
+                    str(self.id) + "/notes.awp?verbe=get&v=1.11.2", data=payload, headers=self.header).json()
+        response = rep.json()
+        self.token = response["token"]
+    
+    @property
+    def header(self):
+        return {'X-Token': self.token}
 
 if __name__=='__main__': # test
     print("===============================================================")

@@ -20,6 +20,6 @@ Username = <variable>.response["data"]["accounts"][0]["identifiant"]
 ```py
 <variable>.fetch_schedule() -> dict[str, list[dict]] # l'emploi du temps de cette semaine
 <variable>.fetch_work() -> list[dict] # liste des devoirs à faire
-<variable>.fetch_notes() -> dict[matiere: str, dict] # dictionnaire des notes par matières
+<variable>.fetch_grades() -> dict[matiere: str, dict] # dictionnaire des notes par matières
 ```
 
