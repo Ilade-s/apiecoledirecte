@@ -212,12 +212,65 @@ class EcoleDirecte():
         self.token = response["token"]
         return format_data(response["data"])
     
-    def fetch_grades(self) -> dict[str]:
+    def fetch_grades(self, raw_data=False) -> dict[str]:
+        """
+        Renvoie un dictionnaire des notes, triées par période (semestre...), puis par matière (+ moyenne générale par période et par matière)
+        
+        PARAMETRE :
+            - raw_data : bool
+                - si vrai, renverra la réponse entière pour chaque note, sinon chaque objet-note contiendra uniquement :
+                    - le nom
+                    - la note obtenue et son coefficient
+                    - la moyenne et la note minimale et maximale de la classe
+                - default = False
+        
+        SORTIE :
+            - Notes :
+                - dict
+                    - (Période: str) : Matiere[
+                        - average: float
+                        - notes: list[dict[** ou
+                            - name: str, 
+                            - grade: float,
+                            - coef: float,
+                            - class_avg: float,
+                            - class_min: float,
+                            - class_max: float
+        """
         payload = 'data={}'
         rep = req.post(f"https://api.ecoledirecte.com/v3/Eleves/" +
-                    str(self.id) + "/notes.awp?verbe=get&v=1.11.2", data=payload, headers=self.header).json()
+                    str(self.id) + "/notes.awp?verbe=get&v=1.11.2", data=payload, headers=self.header)
         response = rep.json()
         self.token = response["token"]
+        data = response['data']
+
+        matieres = [(g['codeMatiere'], g['libelleMatiere']) for g in data['notes'] if not g['codeSousMatiere']]
+
+        def format_grade(grade: dict) -> dict:
+            """to format grade if asked to do so, with name, grade, coef, and class avg/min/max"""
+            return {
+                'name': grade['devoir'],
+                'grade': grade['valeur'],
+                'coef': grade['coef'],
+                'class_avg': grade['moyenneClasse'],
+                'class_min': grade['minClasse'],
+                'class_max': grade['maxClasse']
+            }
+
+        notes = {}
+        for p in data['periodes']:
+            namep = p['periode']
+            notes[namep] = {}
+            for matiere in matieres:
+                notes[namep][matiere] = [
+                    (grade if raw_data else format_grade(grade))
+                    for grade in data['notes']
+                    if grade['codePeriode'] == p['codePeriode']
+                    and grade['libelleMatiere'] == matiere 
+                    ]
+        
+
+        return notes
     
     @property
     def header(self):
@@ -235,7 +288,7 @@ if __name__=='__main__': # test
     interface = EcoleDirecte(username, password)
 
     print("Connecté à :", interface.json["data"]["accounts"][0]["identifiant"])
-
+    """
     print("fetching schedule...")
 
     schedule = interface.fetch_schedule()
@@ -247,3 +300,7 @@ if __name__=='__main__': # test
     work = interface.fetch_work()
 
     print(work)
+    """
+    notes = interface.fetch_grades()
+
+    print(notes)

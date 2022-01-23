@@ -19,7 +19,7 @@ Username = <variable>.response["data"]["accounts"][0]["identifiant"]
 ## Méthodes disponibles :
 ```py
 <variable>.fetch_schedule() -> dict[str, list[dict]] # l'emploi du temps de cette semaine
-<variable>.fetch_work() -> list[dict] # liste des devoirs à faire
-<variable>.fetch_grades() -> dict[matiere: str, dict] # dictionnaire des notes par matières
+<variable>.fetch_work((raw_data: bool)) -> list[dict] # liste des devoirs à faire
+<variable>.fetch_grades() -> dict[matiere: str, dict] # dictionnaire des notes par période et par matière
 ```
 
