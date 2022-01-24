@@ -227,48 +227,69 @@ class EcoleDirecte():
         SORTIE :
             - Notes :
                 - dict
-                    - (Période: str) : Matiere[
+                    - Période(str) : Matiere[
                         - average: float
-                        - notes: list[dict[** ou
-                            - name: str, 
-                            - grade: float,
-                            - coef: float,
-                            - class_avg: float,
-                            - class_min: float,
-                            - class_max: float
+                        - class_avg : float
+                        - class_max : float
+                        - class_min : float
+                        - codeMatiere : dict
+                            - sousMatiere:
+                                - notes: list[dict[raw_dict ou
+                                    - name: str, 
+                                    - grade: float,
+                                    - coef: float,
+                                    - class_avg: float,
+                                    - class_min: float,
+                                    - class_max: float
         """
         payload = 'data={}'
         rep = req.post(f"https://api.ecoledirecte.com/v3/Eleves/" +
-                    str(self.id) + "/notes.awp?verbe=get&v=1.11.2", data=payload, headers=self.header)
+                    str(self.id) + "/notes.awp?verbe=get", data=payload, headers=self.header)
         response = rep.json()
         self.token = response["token"]
         data = response['data']
 
-        matieres = [(g['codeMatiere'], g['libelleMatiere']) for g in data['notes'] if not g['codeSousMatiere']]
+        code_mats = list(set([g['codeMatiere'] for g in data['notes']])) 
+        matieres = {
+            code: [
+                    g['libelleMatiere'] 
+                    for g in data['notes']
+                    if g['codeMatiere'] == code
+                    ] 
+                for code in code_mats
+            }
+
 
         def format_grade(grade: dict) -> dict:
             """to format grade if asked to do so, with name, grade, coef, and class avg/min/max"""
-            return {
+            return grade if raw_data else {
                 'name': grade['devoir'],
                 'grade': grade['valeur'],
                 'coef': grade['coef'],
                 'class_avg': grade['moyenneClasse'],
                 'class_min': grade['minClasse'],
                 'class_max': grade['maxClasse']
-            }
+            } 
 
         notes = {}
         for p in data['periodes']:
             namep = p['periode']
             notes[namep] = {}
-            for matiere in matieres:
-                notes[namep][matiere] = [
-                    (grade if raw_data else format_grade(grade))
-                    for grade in data['notes']
-                    if grade['codePeriode'] == p['codePeriode']
-                    and grade['libelleMatiere'] == matiere 
-                    ]
-        
+            for code, names in matieres.items():
+                notes[namep][code] = {
+                    matiere: [
+                        format_grade(grade)
+                        for grade in data['notes']
+                        if grade['codePeriode'] == p['codePeriode']
+                        and grade['codeMatiere'] == code
+                        and grade['libelleMatiere'] == matiere
+                        ]
+                    for matiere in names
+                }
+            notes[namep]['average'] = p['ensembleMatieres']['moyenneGenerale']
+            notes[namep]['class_avg'] = p['ensembleMatieres']['moyenneClasse']
+            notes[namep]['class_max'] = p['ensembleMatieres']['moyenneMax']
+            notes[namep]['class_min'] = p['ensembleMatieres']['moyenneMin']
 
         return notes
     
