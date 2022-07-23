@@ -2,6 +2,8 @@
 Une interface python permettant de récupérer simplement des informations de l'API (devoirs, notes,...)
 (voir documentation et code pour plus d'informations)
 
+# Info : n'ayant plus accès à mon compte école directe (changement d'établissement), ce projet va certainement rester tel quel, ainsi, d'éventuels mise à jour de l'api ne pourront probablement pas être pris en compte 
+
 # Fonctionnement :
 ## Login :
 Pour commencer, vous devrez vous connecter à votre compte en utilisant votre nom d'utilisateur ainsi que votre mot de passe.
