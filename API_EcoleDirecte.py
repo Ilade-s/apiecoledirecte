@@ -29,6 +29,7 @@ from datetime import date # pour créer dates formatées
 import base64
 import html
 import re
+import io
 
 def create_week_list() -> list[str]:
     """
@@ -100,8 +101,9 @@ class EcoleDirecte():
                 "https://api.ecoledirecte.com/v3/login.awp", 
                 data=payload)
             self.json = self.response.json()
+            print('response : ', self.json)
             if save_json:
-                with open("login.json", "w+", encoding="UTF-8") as file:    
+                with io.open("login.json", "w+", encoding="UTF-8") as file:    
                     json.dump(self.json, file)
 
             self.response.raise_for_status()
