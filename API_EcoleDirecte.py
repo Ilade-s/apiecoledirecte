@@ -91,8 +91,7 @@ class EcoleDirecte():
         # Création payload
         data = {
             "identifiant": username,
-            "motdepasse": password,
-            "acceptationCharte": True
+            "motdepasse": password
         }
         payload = 'data=' + json.dumps(data)
         # essai de requête au login d'école directe
@@ -307,7 +306,7 @@ if __name__=='__main__': # test
     print("===============================================================")
 
     username = input("username/nom d'utilisateur : ")
-    password = getpass("password/mot de passe : ", )
+    password = input("password/mot de passe : ", )
     interface = EcoleDirecte(username, password)
 
     print("Connecté à :", interface.json["data"]["accounts"][0]["identifiant"])
